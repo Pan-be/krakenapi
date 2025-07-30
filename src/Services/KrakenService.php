@@ -9,13 +9,37 @@ class KrakenService
     public function fetchCandles(string $pair, int $interval = 1): array
     {
         $url = "{$this->apiUrl}?pair={$pair}&interval={$interval}";
-        $json = file_get_contents(($url));
 
-        if (!$json) {
-            return ['error' => 'could not connect to Kraken API'];
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 5,       // max 5 sek. na połączenie
+            CURLOPT_TIMEOUT => 10,             // max 10 sek. na całość
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_USERAGENT => 'TradingAnalyzer/1.0',
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+
+        curl_close($ch);
+
+        if ($response === false) {
+            return ['error' => "cURL error: $curlError"];
         }
 
-        $data = json_decode($json, true);
+        if ($httpCode !== 200) {
+            return ['error' => "HTTP error: $httpCode"];
+        }
+
+        $data = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return ['error' => 'Invalid JSON response from Kraken'];
+        }
+
         return $data['result'] ?? [];
     }
 }

@@ -4,6 +4,7 @@ namespace Controllers;
 
 use Services\KrakenService;
 use Services\CandleProcessor;
+use Indicators\IndicatorCalculator;
 use Core\Config;
 
 class CandleFetcherController
@@ -33,7 +34,8 @@ class CandleFetcherController
 
             $candleData = $rawData[$keys[0]];
             $transformedCandles = $processor->transform($candleData);
-            $results[$pair] = $transformedCandles;
+            $enhancedCandles = IndicatorCalculator::applyAll($transformedCandles);
+            $results[$pair] = $enhancedCandles;
         }
 
         return $results;

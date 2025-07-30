@@ -13,6 +13,7 @@ class CandleProcessor
 
             $dataPoint = [
                 'timestamp' => (int)$time,
+                'datetime' => date('Y-m-d H:i:s', (int)$time),
                 'open' => (float)$open,
                 'high' => (float)$high,
                 'low' => (float)$low,
