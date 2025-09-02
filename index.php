@@ -18,6 +18,9 @@ header('Content-Type: application/json');
 $allowedIntervals = Config::load('allowedIntervals');
 
 $interval = Request::getIntervalFromQuery($allowedIntervals);
+var_dump($_GET['interval']);
+var_dump($interval);
+exit;
 
 $controller = new CandleFetcherController();
 $data = $controller->candleHandle($interval);

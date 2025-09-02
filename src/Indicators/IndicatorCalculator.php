@@ -6,6 +6,8 @@ class IndicatorCalculator
 {
     public static function applyAll(array $candles): array
     {
+        $candles = DateTime::calculate($candles);
+
         $candles = SMA20::calculate($candles);
         $candles = SMA50::calculate($candles);
         $candles = SMA200::calculate($candles);
@@ -17,11 +19,11 @@ class IndicatorCalculator
         $candles = OBV::calculate($candles);
         $candles = BollingerBands::calculate($candles);
 
-        // $candles = IchimokuTenkan::calculate($candles);
-        // $candles = IchimokuKijun::calculate($candles);
-        // $candles = IchimokuSenkouA::calculate($candles);
-        // $candles = IchimokuSenkouB::calculate($candles);
-        // $candles = IchimokuChikou::calculate($candles);
+        $candles = IchimokuTenkan::calculate($candles);
+        $candles = IchimokuKijun::calculate($candles);
+        $candles = IchimokuSenkouA::calculate($candles);
+        $candles = IchimokuSenkouB::calculate($candles);
+        $candles = IchimokuChikou::calculate($candles);
 
         return $candles;
     }
