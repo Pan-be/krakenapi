@@ -9,7 +9,7 @@ use Core\Config;
 
 class CandleFetcherController
 {
-    public function candleHandle(int $interval): array
+    public function candleHandle(string $interval): array
     {
         $kraken = new KrakenService();
         $processor = new CandleProcessor();
@@ -21,18 +21,25 @@ class CandleFetcherController
             $rawData = $kraken->fetchCandles($pair, $interval);
 
             if (isset($rawData['error'])) {
-                // Dodaj błąd do wyników dla konkretnej pary
                 $results[$pair] = ['error' => $rawData['error']];
                 continue;
             }
 
-            $keys = array_keys($rawData);
-            if (empty($keys) || !isset($rawData[$keys[0]]) || !is_array($rawData[$keys[0]])) {
-                $results[$pair] = ['error' => 'invalid or empty data structure'];
+            if (empty($rawData) || !is_array($rawData)) {
+                $results[$pair] = ['error' => 'invalid or empty data structure', 'raw' => $rawData];
                 continue;
             }
 
-            $candleData = $rawData[$keys[0]];
+            $candleData = $rawData; // bo fetchCandles już zwraca $data['candles']
+
+            if (empty($candleData) || !is_array($candleData)) {
+                $results[$pair] = ['error' => 'invalid or empty data structure', 'raw' => $rawData];
+                continue;
+            }
+
+            // 👇 debug
+            file_put_contents('/tmp/debug_candles.json', json_encode($candleData, JSON_PRETTY_PRINT));
+
             $transformedCandles = $processor->transform($candleData);
             $enhancedCandles = IndicatorCalculator::applyAll($transformedCandles);
             $results[$pair] = $enhancedCandles;

@@ -4,9 +4,9 @@ namespace Core;
 
 class Request
 {
-    public static function getIntervalFromQuery(array $allowed = []): int
+    public static function getIntervalFromQuery(array $allowed = []): string
     {
-        $interval = isset($_GET['interval']) ? (int) $_GET['interval'] : 0;
+        $interval = isset($_GET['interval']) ? (string) $_GET['interval'] : '1h';
 
         if (!in_array($interval, $allowed)) {
             http_response_code(400);

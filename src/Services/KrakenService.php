@@ -4,11 +4,11 @@ namespace Services;
 
 class KrakenService
 {
-    private string $apiUrl = 'https://api.kraken.com/0/public/OHLC';
+    private string $apiUrl = 'https://futures.kraken.com/api/charts/v1/trade/';
 
-    public function fetchCandles(string $pair, int $interval = 1): array
+    public function fetchCandles(string $pair, string $interval = "1h"): array
     {
-        $url = "{$this->apiUrl}?pair={$pair}&interval={$interval}";
+        $url = "{$this->apiUrl}{$pair}/{$interval}";
 
         $ch = curl_init($url);
 
@@ -37,9 +37,13 @@ class KrakenService
         $data = json_decode($response, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return ['error' => 'Invalid JSON response from Kraken'];
+            return [
+                'error' => 'Invalid JSON response from Kraken',
+                'url' => $url,
+                'raw_response' => substr($response, 0, 300) // wyświetl fragment odpowiedzi
+            ];
         }
 
-        return $data['result'] ?? [];
+        return $data['candles'] ?? [];
     }
 }
