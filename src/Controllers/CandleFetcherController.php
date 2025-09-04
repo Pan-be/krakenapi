@@ -38,11 +38,20 @@ class CandleFetcherController
             }
 
             // 👇 debug
-            file_put_contents('/tmp/debug_candles.json', json_encode($candleData, JSON_PRETTY_PRINT));
+            // file_put_contents('/tmp/debug_candles.json', json_encode($candleData, JSON_PRETTY_PRINT));
 
             $transformedCandles = $processor->transform($candleData);
             $enhancedCandles = IndicatorCalculator::applyAll($transformedCandles);
             $results[$pair] = $enhancedCandles;
+
+            // 👇 zapis do pliku per para
+            $dir = __DIR__ . '/../../storage/candles/' . $interval;
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+
+            $filePath = $dir . '/' . $pair . '.json';
+            file_put_contents($filePath, json_encode($enhancedCandles, JSON_PRETTY_PRINT));
         }
 
         return $results;
