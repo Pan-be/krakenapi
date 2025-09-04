@@ -85,4 +85,4 @@ Applied via `IndicatorCalculator::applyAll()`:
 
 ## License
 
-MIT License
+MIT License ([see LICENSE](../LICENSE))

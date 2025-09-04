@@ -69,4 +69,4 @@ php scripts/jsonToCsv.php 1h --pair=Pf_XBTUSD
 
 ## License
 
-MIT License
+MIT License ([see LICENSE](../LICENSE))
