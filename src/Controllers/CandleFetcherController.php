@@ -13,7 +13,7 @@ class CandleFetcherController
     {
         $kraken = new KrakenService();
         $processor = new CandleProcessor();
-        $pairs = Config::load('pairs');
+        $pairs = Config::load('test_pairs');
 
         $results = [];
 
