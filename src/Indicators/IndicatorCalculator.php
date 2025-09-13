@@ -26,12 +26,12 @@ class IndicatorCalculator
         $candles = ADX::calculate($candles);
         $candles = SuperTrend::calculate($candles);
         $candles = ATRPercent::calculate($candles, 14);
-        $candles = FinalSignal::calculate($candles, [
-            'AT5' => 44,
-            'AT6' => 0,
-            'AT42' => 0.025,
-            'AT43' => 0
-        ]);
+        // $candles = FinalSignal::calculate($candles, [
+        //     'AT5' => 44,
+        //     'AT6' => 0,
+        //     'AT42' => 0.025,
+        //     'AT43' => 0
+        // ]);
 
 
         return $candles;

@@ -34,6 +34,6 @@ class IchimokuSenkouA
             $result[] = $candles[$i]; // bieżąca świeca bez tej wartości, bo jest "w przyszłości"
         }
 
-        return $candles;
+        return $result;
     }
 }

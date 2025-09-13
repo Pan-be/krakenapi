@@ -32,6 +32,6 @@ class IchimokuSenkouB
             $result[] = $candles[$i];
         }
 
-        return $candles;
+        return $result;
     }
 }

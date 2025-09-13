@@ -71,8 +71,13 @@ foreach ($files as $jsonFile) {
         fputcsv($fp, $headers);
 
         foreach ($data as $row) {
-            fputcsv($fp, $row);
+            $ordered = [];
+            foreach ($headers as $h) {
+                $ordered[] = $row[$h] ?? ''; // jeśli brak pola → pusta wartość
+            }
+            fputcsv($fp, $ordered);
         }
+
         fclose($fp);
     } else {
         file_put_contents($outFile, json_encode($data, JSON_PRETTY_PRINT));
