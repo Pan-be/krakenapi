@@ -8,7 +8,10 @@ class KrakenService
 
     public function fetchCandles(string $pair, string $interval = "1h"): array
     {
-        $url = "{$this->apiUrl}{$pair}/{$interval}?from=1725148800&count=7000";
+        // $url = "{$this->apiUrl}{$pair}/{$interval}?from=1667160000&count=7000"; // first one
+        $url = "{$this->apiUrl}{$pair}/{$interval}?from=1764547200&count=7000";
+        // $url = "{$this->apiUrl}{$pair}/{$interval}?from=1742749200&count=7000";
+        // $url = "{$this->apiUrl}{$pair}/{$interval}?count=7000";
 
         $ch = curl_init($url);
 

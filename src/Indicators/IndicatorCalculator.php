@@ -6,14 +6,15 @@ class IndicatorCalculator
 {
     public static function applyAll(array $candles): array
     {
-        $candles = SMA20::calculate($candles);
-        $candles = SMA50::calculate($candles);
-        $candles = SMA200::calculate($candles);
-        $candles = EMA20::calculate($candles);
+        // $candles = SMA20::calculate($candles);
+        // $candles = SMA50::calculate($candles);
+        // $candles = SMA200::calculate($candles);
+        $candles = SMA20Volume::calculate($candles);
+        // $candles = EMA20::calculate($candles);
         $candles = EMA50::calculate($candles);
         $candles = EMA200::calculate($candles);
         // $candles = RSI::calculate($candles);
-        // $candles = MACD::calculate($candles);
+        $candles = MACD::calculate($candles);
         // $candles = OBV::calculate($candles);
         // $candles = BollingerBands::calculate($candles);
 
@@ -23,9 +24,11 @@ class IndicatorCalculator
         $candles = IchimokuSenkouB::calculate($candles);
         // $candles = IchimokuChikou::calculate($candles);
 
+        $candles = ATR::calculate($candles, 14);
         $candles = ADX::calculate($candles);
         $candles = SuperTrend::calculate($candles);
         $candles = ATRPercent::calculate($candles, 14);
+        $candles = SMA20ATRPercent::calculate($candles);
         // $candles = FinalSignal::calculate($candles, [
         //     'AT5' => 44,
         //     'AT6' => 0,
