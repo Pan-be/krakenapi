@@ -45,7 +45,7 @@ class CandleFetcherController
             $results[$pair] = $enhancedCandles;
 
             // 👇 zapis do pliku per para
-            $dir = __DIR__ . '/../../storage/candles/' . $interval;
+            $dir = __DIR__ . '/../../public/json/candles/' . $interval;
             if (!is_dir($dir)) {
                 mkdir($dir, 0777, true);
             }
