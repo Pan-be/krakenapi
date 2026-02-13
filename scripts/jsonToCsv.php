@@ -33,8 +33,8 @@ foreach ($argvCopy as $arg) {
 $pairFilter = $options['pair'] ?? null;
 $outputFormat = $options['output'] ?? 'csv';
 
-$inputDir = __DIR__ . "/../storage/candles/$interval";
-$outputDir = __DIR__ . "/../storage/$outputFormat/$interval";
+$inputDir = __DIR__ . "/../public/json/candles/$interval";
+$outputDir = __DIR__ . "/../public/json/$outputFormat/$interval";
 
 if (!is_dir($inputDir)) {
     fwrite(STDERR, "Input directory not found: $inputDir\n");

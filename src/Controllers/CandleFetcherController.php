@@ -5,20 +5,18 @@ namespace Controllers;
 use Services\KrakenService;
 use Services\CandleProcessor;
 use Indicators\IndicatorCalculator;
-use Core\Config;
 
 class CandleFetcherController
 {
-    public function candleHandle(string $interval): array
+    public function candleHandle(array $pairs, string $interval, int $since): array
     {
         $kraken = new KrakenService();
         $processor = new CandleProcessor();
-        $pairs = Config::load('test_pairs');
 
         $results = [];
 
         foreach ($pairs as $pair) {
-            $rawData = $kraken->fetchCandles($pair, $interval);
+            $rawData = $kraken->fetchCandles($pair, $interval, $since);
 
             if (isset($rawData['error'])) {
                 $results[$pair] = ['error' => $rawData['error']];

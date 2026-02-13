@@ -6,19 +6,26 @@ class KrakenService
 {
     private string $apiUrl = 'https://futures.kraken.com/api/charts/v1/trade/';
 
-    public function fetchCandles(string $pair, string $interval = "1h"): array
+    public function fetchCandles(string $pair, string $interval, ?int $since = null): array
     {
-        // $url = "{$this->apiUrl}{$pair}/{$interval}?from=1667160000&count=7000"; // first one
-        $url = "{$this->apiUrl}{$pair}/{$interval}?from=1764547200&count=7000";
-        // $url = "{$this->apiUrl}{$pair}/{$interval}?from=1742749200&count=7000";
-        // $url = "{$this->apiUrl}{$pair}/{$interval}?count=7000";
+        $queryParams = [
+            'count' => 7000
+        ];
+
+        if ($since !== null) {
+            $queryParams['from'] = $since;
+        }
+
+        $queryString = http_build_query($queryParams);
+
+        $url = "{$this->apiUrl}{$pair}/{$interval}?{$queryString}";
 
         $ch = curl_init($url);
 
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => 5,       // max 5 sek. na połączenie
-            CURLOPT_TIMEOUT => 10,             // max 10 sek. na całość
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 10,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_USERAGENT => 'TradingAnalyzer/1.0',
         ]);
