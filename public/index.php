@@ -69,7 +69,7 @@ $defaultSelected = [
 
 <body>
 
-    <h1>Welcome to the path.<br>It won't be easy but in the you'll find peace and wealth.</h1>
+    <h1>Welcome to the path.<br>It won't be easy but in the end you'll find peace and wealth.</h1>
     <form method="POST" action="candles.php">
 
         <div class="section">
