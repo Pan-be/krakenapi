@@ -4,21 +4,62 @@ namespace Services;
 
 class KrakenService
 {
+    private function intervalToSeconds(string $interval): int
+    {
+        return match ($interval) {
+            '1h' => 3600,
+            '4h' => 14400,
+            default => throw new \InvalidArgumentException("Unsupported interval: $interval")
+        };
+    }
+
+    private function alignTimestampToInterval(int $timestamp, int $intervalSeconds): int
+    {
+        return floor($timestamp / $intervalSeconds) * $intervalSeconds;
+    }
+
+
     private string $apiUrl = 'https://futures.kraken.com/api/charts/v1/trade/';
 
-    public function fetchCandles(string $pair, string $interval, ?int $since = null): array
-    {
+    // public function fetchCandles(string $pair, string $interval, ?int $since = null): array
+    // {
+    //     $queryParams = [
+    //         'count' => 7000
+    //     ];
+
+    //     if ($since !== null) {
+    //         $queryParams['from'] = $since;
+    //     }
+
+    //     $queryString = http_build_query($queryParams);
+
+    //     $url = "{$this->apiUrl}{$pair}/{$interval}?{$queryString}";
+
+    public function fetchCandles(
+        string $pair,
+        string $interval,
+        int $count,
+        ?int $from = null
+    ): array {
+        $intervalSeconds = $this->intervalToSeconds($interval);
+
+        // jeśli nie podano from → teraz
+        $from = $from ?? time();
+
+        // wyrównanie do interwału
+        $alignedFrom = $this->alignTimestampToInterval($from, $intervalSeconds);
+
+        // obliczamy start (pierwszą świecę)
+        $startTimestamp = $alignedFrom - (($count - 1) * $intervalSeconds);
+
         $queryParams = [
-            'count' => 7000
+            'count' => $count,
+            'from'  => $startTimestamp
         ];
 
-        if ($since !== null) {
-            $queryParams['from'] = $since;
-        }
-
         $queryString = http_build_query($queryParams);
-
         $url = "{$this->apiUrl}{$pair}/{$interval}?{$queryString}";
+
 
         $ch = curl_init($url);
 

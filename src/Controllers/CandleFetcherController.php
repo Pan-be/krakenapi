@@ -8,15 +8,44 @@ use Indicators\IndicatorCalculator;
 
 class CandleFetcherController
 {
-    public function candleHandle(array $pairs, string $interval, int $since): array
+    private function clearIntervalDirectory(string $interval): void
+    {
+        $baseDir = realpath(__DIR__ . '/../../public/json/candles');
+
+        if (!$baseDir) {
+            return;
+        }
+
+        $dir = $baseDir . '/' . $interval;
+
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $files = glob($dir . '/*.json');
+
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+
+    // public function candleHandle(array $pairs, string $interval, int $since): array
+    public function candleHandle(array $pairs, string $interval, int $count, ?int $from = null): array
+
     {
         $kraken = new KrakenService();
         $processor = new CandleProcessor();
 
+        // 🔥 czyścimy katalog dla danego interwału
+        $this->clearIntervalDirectory($interval);
+
         $results = [];
 
         foreach ($pairs as $pair) {
-            $rawData = $kraken->fetchCandles($pair, $interval, $since);
+            // $rawData = $kraken->fetchCandles($pair, $interval, $since);
+            $rawData = $kraken->fetchCandles($pair, $interval, $count, $from);
 
             if (isset($rawData['error'])) {
                 $results[$pair] = ['error' => $rawData['error']];
