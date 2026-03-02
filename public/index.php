@@ -113,7 +113,7 @@ button {
 
         <div class="section">
             <h3>Number of candles:</h3>
-            <input type="number" name="count" value="300" min="1" max="1000" required>
+            <input type="number" name="count" value="300" min="1" max="7000" required>
         </div>
 
         <div class="section">
