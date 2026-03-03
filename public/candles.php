@@ -112,7 +112,7 @@ if (!empty($startDate)) {
     }
 }
 
-if ($count < 1 || $count > 1000) {
+if ($count < 1 || $count > 7000) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid count value']);
     exit;
