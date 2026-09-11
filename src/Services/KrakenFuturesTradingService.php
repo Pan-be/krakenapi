@@ -61,34 +61,48 @@ class KrakenFuturesTradingService
     }
 
     /**
+     * Shared transport: signs and sends the request, parses the JSON response.
+     * Used by both post() and get() — the only difference between the two
+     * Kraken auth-wise is that a GET has no postData (signed as an empty string).
+     *
+     * @param string $httpMethod "GET" | "POST"
      * @param string $endpointPath e.g. "/api/v3/sendorder" — used both for the
      *   URL (prefixed with /derivatives) and for the signature (as-is).
      * @param array<string,scalar> $params form params, order not significant.
+     *   Ignored for GET (Kraken Futures GET endpoints here take no params).
      * @return array decoded JSON response.
      */
-    private function post(string $endpointPath, array $params): array
+    private function execute(string $httpMethod, string $endpointPath, array $params = []): array
     {
-        $postData = http_build_query($params);
+        $postData = $httpMethod === 'POST' ? http_build_query($params) : '';
         $nonce = $this->nonce();
         $authent = $this->sign($endpointPath, $nonce, $postData);
 
         $url = $this->baseUrl . '/derivatives' . $endpointPath;
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $postData,
+        $headers = [
+            'APIKey: ' . $this->apiKey,
+            'Authent: ' . $authent,
+            'Nonce: ' . $nonce,
+        ];
+
+        $curlOpts = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_TIMEOUT => 10,
             CURLOPT_USERAGENT => 'TradingAnalyzer/1.0',
-            CURLOPT_HTTPHEADER => [
-                'APIKey: ' . $this->apiKey,
-                'Authent: ' . $authent,
-                'Nonce: ' . $nonce,
-                'Content-Type: application/x-www-form-urlencoded',
-            ],
-        ]);
+        ];
+
+        if ($httpMethod === 'POST') {
+            $curlOpts[CURLOPT_POST] = true;
+            $curlOpts[CURLOPT_POSTFIELDS] = $postData;
+            $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+        }
+
+        $curlOpts[CURLOPT_HTTPHEADER] = $headers;
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $curlOpts);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -110,6 +124,17 @@ class KrakenFuturesTradingService
         }
 
         return $data;
+    }
+
+    /** @param array<string,scalar> $params */
+    private function post(string $endpointPath, array $params): array
+    {
+        return $this->execute('POST', $endpointPath, $params);
+    }
+
+    private function get(string $endpointPath): array
+    {
+        return $this->execute('GET', $endpointPath);
     }
 
     /**
@@ -161,5 +186,39 @@ class KrakenFuturesTradingService
         }
 
         return $this->post('/api/v3/sendorder', $params);
+    }
+
+    /**
+     * Cancel an open order by its Kraken order_id or your own cliOrdId.
+     * Exactly one of the two must be given — Kraken accepts either, but a
+     * call giving neither can't identify which order to cancel.
+     */
+    public function cancelOrder(?string $orderId = null, ?string $cliOrdId = null): array
+    {
+        if ($orderId === null && $cliOrdId === null) {
+            throw new \InvalidArgumentException('cancelOrder requires orderId or cliOrdId.');
+        }
+
+        $params = [];
+        if ($orderId !== null) {
+            $params['order_id'] = $orderId;
+        }
+        if ($cliOrdId !== null) {
+            $params['cliOrdId'] = $cliOrdId;
+        }
+
+        return $this->post('/api/v3/cancelorder', $params);
+    }
+
+    /**
+     * All open positions on the account. The exit engine needs this to know
+     * what's actually open (size, side, entry price) before deciding to close
+     * anything — it doesn't track state itself, Kraken is the source of truth.
+     *
+     * @return array{result?:string,openPositions?:array,serverTime?:string,error?:string}
+     */
+    public function getOpenPositions(): array
+    {
+        return $this->get('/api/v3/openpositions');
     }
 }
