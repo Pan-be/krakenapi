@@ -29,13 +29,6 @@ class IndicatorCalculator
         $candles = SuperTrend::calculate($candles);
         $candles = ATRPercent::calculate($candles, 14);
         $candles = SMA20ATRPercent::calculate($candles);
-        // $candles = FinalSignal::calculate($candles, [
-        //     'AT5' => 44,
-        //     'AT6' => 0,
-        //     'AT42' => 0.025,
-        //     'AT43' => 0
-        // ]);
-
 
         return $candles;
     }
