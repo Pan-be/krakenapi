@@ -4,6 +4,7 @@ namespace Controllers;
 
 use Services\KrakenService;
 use Services\CandleProcessor;
+use Services\CandleRepository;
 use Indicators\IndicatorCalculator;
 
 class CandleFetcherController
@@ -37,8 +38,9 @@ class CandleFetcherController
     {
         $kraken = new KrakenService();
         $processor = new CandleProcessor();
+        $repository = new CandleRepository();
 
-        // 🔥 czyścimy katalog dla danego interwału
+        // 🔥 czyścimy katalog dla danego interwału (JSON snapshot dla UI/exportu — bez zmian)
         $this->clearIntervalDirectory($interval);
 
         $results = [];
@@ -68,6 +70,11 @@ class CandleFetcherController
             // file_put_contents('/tmp/debug_candles.json', json_encode($candleData, JSON_PRETTY_PRINT));
 
             $transformedCandles = $processor->transform($candleData);
+
+            // 💾 accumulate raw OHLCV history (upsert on pair+interval+timestamp) — this is
+            // what actually persists across fetches; the JSON snapshot below is UI/export-only.
+            $repository->upsertMany($pair, $interval, $transformedCandles);
+
             $enhancedCandles = IndicatorCalculator::applyAll($transformedCandles);
             $results[$pair] = $enhancedCandles;
 
