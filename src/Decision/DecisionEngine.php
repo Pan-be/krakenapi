@@ -9,18 +9,17 @@ namespace Decision;
  * "Kraken Trading Bot" vault note for the full mechanics spec this was ported
  * from).
  *
- * FEE ASSUMPTION (unconfirmed): the Excel's final $ column subtracts a 0.001
- * or 0.0007 fee depending on exit type, but which type gets which rate was
- * never pinned down against the sheet. Assumed here: TP exits (likely a
- * resting/maker order) use 0.0007, everything else (SL/TIME/EARLY, likely
- * market/taker orders) uses 0.001. Confirm against the Excel before trusting
- * absolute $/％ P&L figures — it does not affect mode/direction/gate/entry
- * logic above.
+ * FEE, confirmed 2026-09-18 by the method's original author: the fee
+ * subtracted here is a combined entry+exit cost, not exit-only — entry is
+ * always taker. TP and SL exit at maker (entry taker + exit maker ≈
+ * 0.0007); EARLY and TIME exit at taker (entry taker + exit taker ≈ 0.001).
+ * See the "Kraken Trading Bot" vault note, "Fee-rate assumption" section,
+ * for the author's verbatim replies.
  */
 class DecisionEngine
 {
-    private const FEE_TP = 0.0007;
-    private const FEE_OTHER = 0.001;
+    private const FEE_MAKER_EXIT = 0.0007; // TP, SL
+    private const FEE_TAKER_EXIT = 0.001;  // EARLY, TIME
 
     /**
      * @param array $fourHourCandles 4h candles already run through
@@ -119,7 +118,7 @@ class DecisionEngine
             ? ($exitPrice - $entryPrice) / $entryPrice
             : ($entryPrice - $exitPrice) / $entryPrice;
 
-        $fee = $exitType === 'TP' ? self::FEE_TP : self::FEE_OTHER;
+        $fee = in_array($exitType, ['TP', 'SL'], true) ? self::FEE_MAKER_EXIT : self::FEE_TAKER_EXIT;
 
         return ($move - $fee) * 100;
     }
